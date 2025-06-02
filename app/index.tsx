@@ -1,6 +1,8 @@
 import { Stack } from "expo-router";
+import React, { useRef, useState } from "react";
 import {
   Dimensions,
+  FlatList,
   Image,
   StatusBar,
   StyleSheet,
@@ -9,21 +11,63 @@ import {
   View,
 } from "react-native";
 
+const { width, height: screenHeight } = Dimensions.get("window");
+
+const slides = [
+  require("../assets/images/boardBackground.png"),
+  require("../assets/images/boardBackground.png"),
+  require("../assets/images/boardBackground.png"),
+];
+
 export default function Index() {
-  const { height: screenHeight } = Dimensions.get("window");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const flatListRef = useRef(null);
   const imageHeight = (screenHeight * 363) / 640;
+
+  const handleScroll = (event: any) => {
+    const index = Math.round(event.nativeEvent.contentOffset.x / width);
+    setCurrentIndex(index);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar hidden />
       <Stack.Screen options={{ headerShown: false }} />
 
-      <Image
-        source={require("../assets/images/boardBackground.png")}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-        height={imageHeight}
+      {/* Onboarding Carousel */}
+      <FlatList
+        ref={flatListRef}
+        data={slides}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ item }) => (
+          <Image
+            source={item}
+            style={[styles.backgroundImage, { height: imageHeight }]}
+            resizeMode="cover"
+          />
+        )}
       />
 
+      {/* Pagination Dots */}
+      <View style={styles.pagination}>
+        {slides.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.dot,
+              {
+                backgroundColor: index === currentIndex ? "#000" : "#C4C4C4",
+              },
+            ]}
+          />
+        ))}
+      </View>
+
+      {/* Text Below Carousel */}
       <View style={styles.textContainer}>
         <Text style={styles.title}>Easy Online Payment</Text>
         <Text style={styles.description}>
@@ -32,12 +76,13 @@ export default function Index() {
         </Text>
       </View>
 
+      {/* Buttons */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.buttonPrimary}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.buttonSecondary}>
-          <Text style={styles.buttonTextSecondary}>Sigh Up</Text>
+          <Text style={styles.buttonTextSecondary}>Sign Up</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -50,16 +95,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F8F8",
   },
   backgroundImage: {
-    width: "100%",
-    // height: "55%",
+    width: width,
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginVertical: 8,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
   },
   textContainer: {
-    display: "flex",
-    gap: 6,
+    alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,
-    alignItems: "center",
-    marginTop: 56,
+    marginTop: 16,
   },
   title: {
     fontSize: 35,
@@ -99,7 +152,6 @@ const styles = StyleSheet.create({
     borderWidth: 0.79,
     borderColor: "#000000",
   },
-
   buttonText: {
     color: "#FFFFFF",
     fontSize: 16,
