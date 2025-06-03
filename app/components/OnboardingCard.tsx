@@ -1,5 +1,6 @@
+import { useRouter } from 'expo-router'; // Import useRouter
 import React from 'react';
-import { Dimensions, Image, ImageSourcePropType, StyleSheet, View } from 'react-native';
+import { Dimensions, Image, ImageSourcePropType, StyleSheet, TouchableOpacity, View } from 'react-native'; // Import TouchableOpacity
 
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width * 1;
@@ -12,13 +13,30 @@ interface OnboardingCardProps {
 const OnboardingCard: React.FC<OnboardingCardProps> = ({
     image,
 }) => {
+    const router = useRouter(); // Initialize the router
+
+    const handleImagePress = () => {
+        router.push('/sendMoney'); // Navigate to the sendMoney page
+    };
+
     return (
         <View style={styles.card}>
-            <Image source={image} style={styles.image} resizeMode="contain" />
-            <Image source={image} style={styles.image} resizeMode="contain" />
-            <Image source={image} style={styles.image} resizeMode="contain" />
-            <Image source={image} style={styles.image} resizeMode="contain" />
-            <Image source={image} style={styles.image} resizeMode="contain" />
+            {/* Wrap each Image in a TouchableOpacity */}
+            <TouchableOpacity onPress={handleImagePress}>
+                <Image source={image} style={styles.image} resizeMode="contain" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleImagePress}>
+                <Image source={image} style={styles.image} resizeMode="contain" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleImagePress}>
+                <Image source={image} style={styles.image} resizeMode="contain" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleImagePress}>
+                <Image source={image} style={styles.image} resizeMode="contain" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleImagePress}>
+                <Image source={image} style={styles.image} resizeMode="contain" />
+            </TouchableOpacity>
         </View>
     );
 };
