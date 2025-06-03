@@ -1,9 +1,11 @@
-import { Stack } from "expo-router";
-import React, { useRef, useState } from "react";
+import { Stack, useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
   Dimensions,
   FlatList,
   Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   StatusBar,
   StyleSheet,
   Text,
@@ -11,21 +13,16 @@ import {
   View,
 } from "react-native";
 
-const { width, height: screenHeight } = Dimensions.get("window");
-
-const slides = [
-  require("../assets/images/boardBackground.png"),
-  require("../assets/images/boardBackground.png"),
-  require("../assets/images/boardBackground.png"),
-];
+const slides = [1, 2, 3]; // Just identifiers for carousel pages
 
 export default function Index() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const flatListRef = useRef(null);
+  const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
   const imageHeight = (screenHeight * 363) / 640;
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const router = useRouter();
 
-  const handleScroll = (event: any) => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / width);
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
     setCurrentIndex(index);
   };
 
@@ -34,19 +31,18 @@ export default function Index() {
       <StatusBar hidden />
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Onboarding Carousel */}
+      {/* Scrollable Background Image Carousel */}
       <FlatList
-        ref={flatListRef}
         data={slides}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onScroll={handleScroll}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item }) => (
+        keyExtractor={(item) => item.toString()}
+        renderItem={() => (
           <Image
-            source={item}
-            style={[styles.backgroundImage, { height: imageHeight }]}
+            source={require("../assets/images/boardBackground.png")}
+            style={[styles.backgroundImage, { width: screenWidth, height: imageHeight }]}
             resizeMode="cover"
           />
         )}
@@ -57,28 +53,25 @@ export default function Index() {
         {slides.map((_, index) => (
           <View
             key={index}
-            style={[
-              styles.dot,
-              {
-                backgroundColor: index === currentIndex ? "#000" : "#C4C4C4",
-              },
-            ]}
+            style={[styles.dot, currentIndex === index && styles.activeDot]}
           />
         ))}
       </View>
 
-      {/* Text Below Carousel */}
+      {/* Text Section */}
       <View style={styles.textContainer}>
         <Text style={styles.title}>Easy Online Payment</Text>
         <Text style={styles.description}>
-          Make your payment experience more better today. No additional admin
-          fee
+          Make your payment experience more better today. No additional admin fee
         </Text>
       </View>
 
       {/* Buttons */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.buttonPrimary}>
+        <TouchableOpacity
+          style={styles.buttonPrimary}
+          onPress={() => router.push("/mainPage")}
+        >
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.buttonSecondary}>
@@ -95,24 +88,30 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F8F8",
   },
   backgroundImage: {
-    width: width,
+    height: "60%",
   },
   pagination: {
     flexDirection: "row",
     justifyContent: "center",
-    marginVertical: 8,
+    marginTop: 10,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
+    backgroundColor: "#ccc",
     marginHorizontal: 4,
   },
+  activeDot: {
+    backgroundColor: "#000",
+  },
   textContainer: {
-    alignItems: "center",
+    display: "flex",
+    gap: 6,
     justifyContent: "center",
     paddingHorizontal: 20,
-    marginTop: 16,
+    alignItems: "center",
+    marginTop: 25,
   },
   title: {
     fontSize: 35,
@@ -135,6 +134,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 24,
     gap: 6,
+    marginBottom: 25,
   },
   buttonPrimary: {
     backgroundColor: "#000000",
